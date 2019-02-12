@@ -11,7 +11,7 @@ from rest_framework import status, viewsets
 
 # Django REST Authentication
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from models import Workout
 from serializers import WorkoutSerializer
@@ -96,12 +96,11 @@ class ConfigView(APIView):
     API endpoint for config initialization.
     """
 
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     def get(self, request):
-        version = settings.get('min_app_version', 1)
-        force_update = settings.get('force_update', 'true')
+        version = getattr(settings, 'min_app_version', 1)
+        force_update = getattr(settings, 'force_update', 'true')
         config = {'min_app_version': version,
                   'force_update': force_update,}
         return Response(config, status=status.HTTP_200_OK)

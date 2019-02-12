@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# posible traduccion en el futuro
+# Future translation
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -52,3 +52,4 @@ class Workout(models.Model):
 
     def __unicode__(self):
         return "%s's workout" % self.user.username
+
