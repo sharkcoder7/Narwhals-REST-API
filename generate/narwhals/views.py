@@ -31,7 +31,7 @@ class UserView(viewsets.ModelViewSet):
 
 class EntrenamientoList(APIView):
     """
-    List all snippets, or create a new entrenamiento.
+    List all entrenamientos, or create a new entrenamiento.
     """
     def get(self, request, format=None):
         entrenamientos = Entrenamiento.objects.all()
