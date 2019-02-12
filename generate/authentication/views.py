@@ -19,7 +19,8 @@ from utils.decorators import api_key_checker
 from utils.decorators import sport_checker
 
 
-SAFE_METHODS = ['POST', 'PUT']
+SAFE_METHODS = ['POST']
+
 
 class IsAuthenticatedOrReadOnly(BasePermission):
     """
@@ -33,6 +34,7 @@ class IsAuthenticatedOrReadOnly(BasePermission):
             return True
         return False
 
+
 class UserList(APIView):
     """
     Creates a new user.
@@ -43,7 +45,7 @@ class UserList(APIView):
     @api_key_checker
     @sport_checker
     def get(self, request, format=None):
-        sport = request.data.get('sport', '')
+        sport = int(request.data.get('sport', ''))
         if sport == 0:
             swimmers = Swimmer.objects.all()
             serializer = SwimmerSerializer(swimmers, many=True)

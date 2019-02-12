@@ -50,7 +50,7 @@ class SwimmerSerializer(serializers.ModelSerializer):
                   'id', 'last_login', 'email', 'date_of_birth',
                   'city_id', 'name', 'surname',
                   'bio', 'avatar', 'token')
-        read_only_fields = ('position', 'meters', 'minutes', 'trend', 'type', 
+        read_only_fields = ('position', 'meters', 'minutes', 'trend', 
                             'id', 'last_login')
 
     def get_token(self, user):
@@ -89,7 +89,7 @@ class RunnerSerializer(serializers.ModelSerializer):
                   'id', 'last_login', 'email', 'date_of_birth',
                   'city_id', 'name', 'surname',
                   'bio', 'avatar', 'token')
-        read_only_fields = ('position', 'meters', 'minutes', 'trend', 'type',
+        read_only_fields = ('position', 'meters', 'minutes', 'trend',
                             'id', 'last_login')
 
     def get_token(self, user):
