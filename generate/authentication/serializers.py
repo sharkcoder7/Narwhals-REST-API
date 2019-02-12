@@ -28,28 +28,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 class SwimmerSerializer(serializers.ModelSerializer):
 
-    id = serializers.IntegerField(source='type.id')
-    last_login = serializers.DateTimeField(source='type.last_login')
-    email = serializers.EmailField(source='type.email')
-    date_of_birth = serializers.DateField(source='type.date_of_birth')
-    city_id = serializers.IntegerField(source='type.city_id')
-    name = serializers.CharField(source='type.name')
-    surname = serializers.CharField(source='type.surname')
-    bio = serializers.CharField(source='type.bio')
-    avatar = serializers.CharField(source='type.avatar')
-    token = serializers.SerializerMethodField(source='type.token')
-
     specific_fields = ['position', 'meters', 'minutes', 'strokes',
                        'trend', 'type']
 
     class Meta:
         model = Swimmer
         fields = ('position', 'meters', 'minutes', 'strokes',
-                  'trend', 'type',
-                  # Generic fields
-                  'id', 'last_login', 'email', 'date_of_birth',
-                  'city_id', 'name', 'surname',
-                  'bio', 'avatar', 'token')
+                  'trend', 'type')
         read_only_fields = ('position', 'meters', 'minutes', 'trend', 
                             'id', 'last_login')
 

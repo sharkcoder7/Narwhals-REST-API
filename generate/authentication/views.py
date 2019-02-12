@@ -45,7 +45,7 @@ class UserList(APIView):
     @api_key_checker
     @sport_checker
     def get(self, request, format=None):
-        sport = int(request.data.get('sport', ''))
+        sport = int(request.query_params.get('sport', ''))
         if sport == 0:
             swimmers = Swimmer.objects.all()
             serializer = SwimmerSerializer(swimmers, many=True)
@@ -66,7 +66,7 @@ class UserList(APIView):
         except:
             pass
 
-        sport = int(request.data.get('sport', '0'))
+        sport = int(request.query_params.get('sport', '0'))
         user = UserSerializer()
         user_fields = [key for key in user.get_fields().keys()]
         user_data = { key: request.data[key]
@@ -123,7 +123,7 @@ class UserDetail(APIView):
     def put(self, request, pk, format=None):
         user = User.objects.get(id=pk)
         user_serializer = UserSerializer()
-        sport = int(request.data.get('sport', ''))
+        sport = int(request.query_params.get('sport', ''))
         user_data = { key: request.data[key]
                       for key in user_serializer.fields
                       if key in request.data }
@@ -186,17 +186,19 @@ class ObtainAuthToken(APIView):
     @api_key_checker
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
-        sport = int(request.data.get('sport', ''))
+        sport = int(request.query_params.get('sport', ''))
         if serializer.is_valid():
             user = serializer.validated_data['user']
             token, created = Token.objects.get_or_create(user=user)
             if sport == 0:
                 swimmer = Swimmer.objects.get(type=user.id)
-                user_serialized = SwimmerSerializer(user)
+                user_serialized = SwimmerSerializer(swimmer)
             elif sport == 1:
                 runner = Runner.objects.get(type=user.id)
                 user_serialized = RunnerSerializer(runner)
-            return Response(success_response(user_serialized.data))
+            response_data = user_serialized.data
+            response_data['token'] = token.key
+            return Response(success_response(response_data))
         else:
             return Response(error_response("User or password incorrect."))
 
@@ -222,10 +224,7 @@ class CheckSession(APIView):
             # can also modify this exception message
             return Response(error_response("User inactive or deleted."))
 
-        try:
-            sport = int(request.data.get('sport', ''))
-        except:
-            sport = int(request.GET.get('sport', ''))
+        sport = int(request.query_params.get('sport', ''))
 
         if sport == 0:
             swimmer = Swimmer.objects.get(type=request.user.id)

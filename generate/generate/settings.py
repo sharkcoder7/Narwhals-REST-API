@@ -62,6 +62,9 @@ INSTALLED_APPS = (
 
     'corsheaders',
 
+    # tests
+    'django_nose',
+
     'narwhals',
     'authentication',
      # users email handling
@@ -114,6 +117,16 @@ MEDIA_ROOT = '/home/apelegrina/webapps/generate_static/media'
 MEDIA_URL = '/media/'
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+# Use nose to run all tests
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+# Tell nose to measure coverage on the 'authenticate' and 'narwhals' apps
+NOSE_ARGS = [
+    '--with-coverage',
+    '--cover-package=authentication,narwhals',
+    '--cover-html'
+]
 
 # Android App settings
 min_app_version = 1
