@@ -16,17 +16,17 @@ class Workout(models.Model):
     Workout model.
     """
 
-    auto_increment_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User)
     sport = models.CharField(max_length=1, choices=SPORT_CHOICES, 
                                 blank=True, null=True)
     description = models.CharField(max_length=500, blank=True, null=True)
     dateStart = models.DateTimeField(verbose_name=_('Creation date'), 
                                 help_text=_('Date of the creation'),
-                                auto_now_add=True, blank=True, null=True)
+                                blank=True, null=True)
     dateFinish = models.DateTimeField(verbose_name=_('End date'), 
                                 help_text=_('End date'),
-                                auto_now_add=True, blank=True, null=True)
+                                blank=True, null=True)
     duration = models.IntegerField(verbose_name=(_('Duration of the training')),
                                 help_text=_('Duration of the training'),
                                 blank=True, null=True)
@@ -44,6 +44,9 @@ class Workout(models.Model):
                                 blank=True, null=True)
     difficulty = models.IntegerField(verbose_name=(_('Difficulty of the training')),
                                 help_text=_('Difficulty of the training'), default=1,
+                                blank=True, null=True)
+    mood = models.IntegerField(verbose_name=(_("User's mood")),
+                                help_text=_("User's mood"), default=1,
                                 blank=True, null=True)
 
 

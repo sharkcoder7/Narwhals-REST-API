@@ -10,13 +10,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 
-from django.contrib.auth.models import User
-
-from serializers import UserSerializer
-
 # Django REST Authentication
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+
+from django.contrib.auth.models import User
+
+from serializers import UserSerializer
+from utils import success_response, error_response
+
 
 logging.basicConfig(filename='/home/apelegrina/logs/user/narwhals.log',level=logging.DEBUG,
         format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
@@ -41,7 +43,7 @@ class WorkoutList(APIView):
     def get(self, request, format=None):
         workouts = Workout.objects.filter(user=request.user)
         serializer = WorkoutSerializer(workouts, many=True)
-        return Response(serializer.data)
+        return Response(success_response(serializer.data))
 
     def post(self, request, format=None):
         serializer = WorkoutSerializer(data=request.data, many=True)
@@ -83,3 +85,16 @@ class WorkoutDetail(APIView):
         workout = self.get_object(pk, request.user)
         workout.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class ConfigView(APIView):
+    """
+    API endpoint for config initialization.
+    """
+
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        config = {'min_app_version': 1,
+                  'force_update': 'true',}
+        return Response(config, status=status.HTTP_200_OK)
