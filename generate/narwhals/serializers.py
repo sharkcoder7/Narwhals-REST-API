@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('password', 'first_name', 'last_name', 'email',)
+        fields = ('username', 'first_name', 'last_name', 'email',)
         write_only_fields = ('password',)
         read_only_fields = ('is_staff', 'is_superuser', 'is_active', 'date_joined',)
 
@@ -20,10 +20,11 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+"""
 class EntrenamientoSerializer(serializers.Serializer):
-     """ """
 
      user = UserSerializer()
+     id = serializers.IntegerField()
      sport = serializers.ChoiceField(choices=SPORT_CHOICES)
      description = serializers.CharField(max_length=500)
      dateStart = serializers.DateTimeField()
@@ -41,4 +42,11 @@ class EntrenamientoSerializer(serializers.Serializer):
      isPrivate = serializers.BooleanField()
      isSynchronized = serializers.BooleanField()
      difficulty = serializers.IntegerField()
+"""
 
+class EntrenamientoSerializer(serializers.ModelSerializer):
+
+    #user = serializers.RelatedField(source='user', read_only=True)
+
+    class Meta:
+        model = Entrenamiento

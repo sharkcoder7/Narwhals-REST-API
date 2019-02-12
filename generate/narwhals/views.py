@@ -1,3 +1,5 @@
+import logging
+
 from django.shortcuts import render
 from django.http import Http404
 
@@ -18,50 +20,78 @@ from rest_framework.permissions import AllowAny
 from permissions import IsStaffOrTargetUser
 from serializers import UserSerializer
 
+# Django REST Authentication
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+
+logging.basicConfig(filename='/home/apelegrina/logs/user/narwhals.log',level=logging.DEBUG,
+        format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
+
 
 class UserView(viewsets.ModelViewSet):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
     serializer_class = UserSerializer
     model = User
 
+    """
     def get_permissions(self):
         # allow non-authenticated user to create via POST
         return (AllowAny() if self.request.method == 'POST'
                 else IsStaffOrTargetUser()),
-
+    """
 
 class EntrenamientoList(APIView):
     """
     List all entrenamientos, or create a new entrenamiento.
     """
+
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request, format=None):
-        entrenamientos = Entrenamiento.objects.all()
+        entrenamientos = Entrenamiento.objects.filter(user=request.user)
         serializer = EntrenamientoSerializer(entrenamientos, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = EntrenamientoSerializer(data=request.data)
+        serializer = EntrenamientoSerializer(data=request.data, many=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CreateRetrieveAPIView(mixins.CreateModelMixin,
-                            mixins.RetrieveModelMixin,
-                            generics.GenericAPIView):
-    """
-    Concrete view for creating or retrieving a model instance.
-    """
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-
-class EntrenamientoDetail(CreateRetrieveAPIView):
+class EntrenamientoDetail(APIView):
     """
     API endpoint for entrenamientos.
     """
-    queryset = Entrenamiento.objects.all()
-    serializer_class = EntrenamientoSerializer
+
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self, pk, user):
+        logging.debug("request. Id %s and user %s" % (pk, user))
+        try:
+            return Entrenamiento.objects.get(id=pk, user=user)
+        except:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        entrenamiento = self.get_object(pk, request.user)
+        serializer = EntrenamientoSerializer(entrenamiento)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        entrenamiento = self.get_object(pk, request.user)
+        serializer = EntrenamientoSerializer(entrenamiento, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        entrenamiento = self.get_object(pk, request.user)
+        entrenamiento.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
