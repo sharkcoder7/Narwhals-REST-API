@@ -81,3 +81,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = '/home/apelegrina/webapps/generate_static/'
+
+# Android App settings
+min_app_version = 1
+force_update = 'true'
