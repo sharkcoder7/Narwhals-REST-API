@@ -1,8 +1,8 @@
 from django.contrib import admin
 
-from narwhals.models import Entrenamiento
+from narwhals.models import Workout
 
-class EntrenamientoAdmin(admin.ModelAdmin):
-    list_display = ("user", "sport", "filepath", "isPrivate", "isSynchronized", "difficulty")
+class WorkoutAdmin(admin.ModelAdmin):
+    list_display = ("user", "sport", "difficulty", "duration", "strokes", "distance", "speedAverage", "strokeAverage")
 
-admin.site.register(Entrenamiento, EntrenamientoAdmin)
+admin.site.register(Workout, WorkoutAdmin)

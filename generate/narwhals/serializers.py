@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from models import Entrenamiento, SPORT_CHOICES, FILE_TYPE_CHOICES
+from models import Workout
 
 from django.contrib.auth.models import User
 
@@ -20,33 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-"""
-class EntrenamientoSerializer(serializers.Serializer):
-
-     user = UserSerializer()
-     id = serializers.IntegerField()
-     sport = serializers.ChoiceField(choices=SPORT_CHOICES)
-     description = serializers.CharField(max_length=500)
-     dateStart = serializers.DateTimeField()
-     dateEnd = serializers.DateTimeField()
-     duration = serializers.IntegerField()
-     distance = serializers.FloatField()
-     speedMax = serializers.FloatField()
-     speedAvg = serializers.FloatField()
-     heightMax = serializers.IntegerField()
-     heightMin = serializers.IntegerField()
-     metersUploaded = serializers.IntegerField()
-     metersDownloaded = serializers.IntegerField()
-     filetype = serializers.ChoiceField(choices=FILE_TYPE_CHOICES)
-     filepath = serializers.CharField() 
-     isPrivate = serializers.BooleanField()
-     isSynchronized = serializers.BooleanField()
-     difficulty = serializers.IntegerField()
-"""
-
-class EntrenamientoSerializer(serializers.ModelSerializer):
-
-    #user = serializers.RelatedField(source='user', read_only=True)
+class WorkoutSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Entrenamiento
+        model = Workout
