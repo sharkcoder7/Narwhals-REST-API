@@ -45,6 +45,8 @@ INSTALLED_APPS = (
 
     'narwhals',
     'authentication',
+     # users email handling
+    'authemail',
     'utils',
 )
 

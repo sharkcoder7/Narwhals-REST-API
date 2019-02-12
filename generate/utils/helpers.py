@@ -22,6 +22,15 @@ def error_response(error):
     """
     response = {}
     response["success"] = False
-    response["message"] = error
+    message = error
+    if isinstance(error, dict):
+        message = ''
+        for key, value in error.iteritems():
+            if isinstance(value, list):
+                for item_value in value:
+                    message += '%s ' % item_value
+            else:
+                message += '%s , ' % value
+    response["message"] = message
 
     return response

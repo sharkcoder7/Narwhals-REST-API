@@ -36,7 +36,7 @@ class WorkoutList(APIView):
     @api_key_checker
     def get(self, request, format=None):
         paginator = CustomPagination()
-        workouts = Workout.objects.filter(user=request.user)
+        workouts = Workout.objects.filter(user=request.user).order_by('-dateStart')
         serializer = WorkoutSerializer(workouts, many=True)
         return paginator.get_paginated_response(success_response(serializer.data))
 
