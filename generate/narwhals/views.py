@@ -1,5 +1,6 @@
 import logging
 
+from django.core import serializers
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from django.http import Http404
@@ -10,28 +11,17 @@ from rest_framework.response import Response
 from rest_framework import status, viewsets
 
 # Django REST Authentication
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import TokenAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from models import Workout
+from authentication.models import User
 from serializers import WorkoutSerializer
-from serializers import UserSerializer
-from utils import success_response, error_response
-
+from utils.helpers import success_response, error_response
+from utils.decorators import api_key_checker
 
 logging.basicConfig(filename='/home/apelegrina/logs/user/narwhals.log',level=logging.DEBUG,
         format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
-
-
-class UserView(viewsets.ModelViewSet):
-    """
-    API endpoint for User
-    """
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-
-    serializer_class = UserSerializer
-    model = User
 
 
 class WorkoutList(APIView):
@@ -39,7 +29,7 @@ class WorkoutList(APIView):
     List all workouts, or create a new workout.
     """
 
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (BasicAuthentication, TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, format=None):
@@ -48,7 +38,10 @@ class WorkoutList(APIView):
         return Response(success_response(serializer.data))
 
     def post(self, request, format=None):
-        serializer = WorkoutSerializer(data=request.data, many=True)
+        data = request.data
+        data["user"] = request.user.id
+        serializer = WorkoutSerializer(data=request.data)
+
         if serializer.is_valid():
             serializer.save()
             return Response(success_response(serializer.data),
@@ -62,7 +55,7 @@ class WorkoutDetail(APIView):
     API endpoint for workout.
     """
 
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (BasicAuthentication, TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk, format=None):
@@ -98,9 +91,11 @@ class ConfigView(APIView):
 
     permission_classes = (AllowAny,)
 
+    @api_key_checker
     def get(self, request):
+        key_provided = request.GET.get('api_key', '')
         version = getattr(settings, 'min_app_version', 1)
-        force_update = getattr(settings, 'force_update', 'true')
+        force_update = getattr(settings, 'force_update', True)
         config = {'min_app_version': version,
                   'force_update': force_update,}
-        return Response(config, status=status.HTTP_200_OK)
+        return Response(success_response(config), status=status.HTTP_200_OK)

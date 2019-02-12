@@ -1,4 +1,3 @@
-
 def success_response(data):
     """
     {  
@@ -9,8 +8,8 @@ def success_response(data):
     """
     response = {}
     response["data"] = data
-    response["success"] = "true"
-    response["message"] = "null"
+    response["success"] = True
+    response["message"] = None
 
     return response
 
@@ -22,7 +21,7 @@ def error_response(error):
     }
     """
     response = {}
-    response["success"] = "false"
+    response["success"] = False
     response["message"] = error
 
     return response

@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 # Future translation
 from django.utils.translation import ugettext_lazy as _
@@ -17,7 +17,7 @@ class Workout(models.Model):
     """
 
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
     sport = models.CharField(max_length=1, choices=SPORT_CHOICES, 
                                 blank=True, null=True)
     description = models.CharField(max_length=500, blank=True, null=True)
@@ -51,5 +51,5 @@ class Workout(models.Model):
 
 
     def __unicode__(self):
-        return "%s's workout" % self.user.username
+        return "%s's workout" % self.user.email
 

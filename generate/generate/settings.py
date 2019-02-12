@@ -45,6 +45,7 @@ INSTALLED_APPS = (
 
     'narwhals',
     'authentication',
+    'utils',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -86,4 +87,4 @@ STATIC_ROOT = '/home/apelegrina/webapps/generate_static/'
 
 # Android App settings
 min_app_version = 1
-force_update = 'true'
+force_update = True
