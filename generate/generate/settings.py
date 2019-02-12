@@ -60,11 +60,14 @@ INSTALLED_APPS = (
     'django_extensions',
     'rest_framework_swagger',
 
+    'corsheaders',
+
     'narwhals',
     'authentication',
      # users email handling
     'authemail',
     'utils',
+    'stats'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -75,6 +78,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 )
 
 ROOT_URLCONF = 'generate.urls'
@@ -107,6 +112,8 @@ STATIC_ROOT = '/home/apelegrina/webapps/generate_static/'
 MEDIA_ROOT = '/home/apelegrina/webapps/generate_static/media'
 
 MEDIA_URL = '/media/'
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 # Android App settings
 min_app_version = 1

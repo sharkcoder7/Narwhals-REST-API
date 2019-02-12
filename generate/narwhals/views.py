@@ -16,13 +16,17 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from models import SwimWorkout, RunWorkout
 from authentication.models import Swimmer, Runner
+from authentication.models import SWIMMING, RUNNING
+
 from serializers import SwimWorkoutSerializer, RunWorkoutSerializer
 from paginator import CustomPagination
 
 from utils.helpers import success_response, error_response
 from utils.decorators import api_key_checker
 from utils.decorators import sport_checker
+from utils.decorators import landing_key_checker
 
+from stats.models import SwimmingStats, RunningStats
 
 logging.basicConfig(filename='/home/apelegrina/logs/user/narwhals.log',level=logging.DEBUG,
         format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
@@ -40,8 +44,8 @@ class WorkoutList(APIView):
     @api_key_checker
     def get(self, request, format=None):
         paginator = CustomPagination()
-        sport = int(request.data.get('sport', ''))
-        if sport == 0:
+        sport = int(request.query_params.get('sport'))
+        if sport == SWIMMING:
             try:
                 swimmer = Swimmer.objects.get(type__id=request.user.id)
                 swim_workouts = SwimWorkout.objects.filter(user=swimmer).order_by('-dateStart')
@@ -50,10 +54,10 @@ class WorkoutList(APIView):
                 return Response(error_response('This user has not a swimmer profile enabled.'),
                                 status=status.HTTP_404_NOT_FOUND)
 
-        elif sport == 1:
+        elif sport == RUNNING:
             try:
                 runner = Runner.objects.get(type_id=request.user.id)
-                run_workouts = RunWorkouts.objects.filter(user=request.user).order_by('-dateStart')
+                run_workouts = RunWorkout.objects.filter(user=runner).order_by('-dateStart')
                 serializer = RunWorkoutSerializer(run_workouts, many=True)
             except:
                 return Response(error_response('This user has not a runner profile enabled.'),
@@ -68,11 +72,11 @@ class WorkoutList(APIView):
         user_id = request.user.id
         sport = int(request.data.get('sport', ''))
 
-        if sport == 0:
+        if sport == SWIMMING:
             sport_user = Swimmer.objects.get(type__id=user_id)
             data['user'] = sport_user.id
             serializer = SwimWorkoutSerializer(data=data)
-        elif sport == 1:
+        elif sport == RUNNING:
             sport_user = Runner.objects.get(type__id=user_id)
             data['user'] = sport_user.id
             serializer = RunWorkoutSerializer(data=data)
@@ -96,16 +100,17 @@ class WorkoutDetail(APIView):
     @sport_checker
     @api_key_checker
     def get(self, request, pk, format=None):
-        sport = int(request.data.get('sport', ''))
+        #sport = int(request.data.get('sport', ''))
+        sport = int(request.query_params.get('sport'))
 
-        if sport == 0:
+        if sport == SWIMMING:
             try:
                 workout = SwimWorkout.objects.get(id=pk)
                 serializer = SwimWorkoutSerializer(workout)
             except:
                 return Response(error_response("Workout with id %s not found" % pk),
                                 status=status.HTTP_404_NOT_FOUND)
-        elif sport == 1:
+        elif sport == RUNNING:
             try:
                 workout = RunWorkout.objects.get(id=pk)
                 serializer = RunWorkoutSerializer(workout)
@@ -120,7 +125,7 @@ class WorkoutDetail(APIView):
     def put(self, request, pk, format=None):
         sport = int(request.data.get('sport', ''))
 
-        if sport == 0:
+        if sport == SWIMMING:
             try:
                 workout = SwimWorkout.objects.get(id=pk)
                 serializer = SwimWorkoutSerializer(workout,
@@ -129,7 +134,7 @@ class WorkoutDetail(APIView):
             except:
                 return Response(error_response("Workout with id %s not found" % pk),
                                 status=status.HTTP_404_NOT_FOUND)
-        elif sport == 1:
+        elif sport == RUNNING:
             try:
                 workout = RunWorkout.objects.get(id=pk)
                 serializer = RunWorkoutSerializer(workout,
@@ -151,13 +156,13 @@ class WorkoutDetail(APIView):
     def delete(self, request, pk, format=None):
         sport = int(request.data.get('sport', ''))
 
-        if sport == 0:
+        if sport == SWIMMING:
             try:
                 workout = SwimWorkout.objects.get(id=pk)
             except:
                 return Response(error_response("Workout with id %s not found" % pk),
                                 status=status.HTTP_404_NOT_FOUND)
-        elif sport == 1:
+        elif sport == RUNNING:
             try:
                 workout = RunWorkout.objects.get(id=pk)
             except:
@@ -178,9 +183,32 @@ class ConfigView(APIView):
 
     @api_key_checker
     def get(self, request):
-        key_provided = request.GET.get('api_key', '')
         version = getattr(settings, 'min_app_version', 1)
         force_update = getattr(settings, 'force_update', True)
         config = {'min_app_version': version,
                   'force_update': force_update,}
         return Response(success_response(config), status=status.HTTP_200_OK)
+
+
+class LandingView(APIView):
+    """
+    API endpoint to update the landing.
+    """
+
+    permission_classes = (AllowAny,)
+
+    @sport_checker
+    @landing_key_checker
+    def get(self, request):
+        sport = int(request.query_params.get('sport'))
+        if sport == SWIMMING:
+            swim_stats = SwimmingStats.objects.get(id=1)
+            data = {'strokes': swim_stats.strokes,
+                    'duration': swim_stats.duration,
+                    'distance': swim_stats.distance}
+        elif sport == RUNNING:
+            run_stats = RunningStats.objects.get(id=1)
+            data = {'duration': run_stats.duration,
+                    'distance': run_stats.distance}
+
+        return Response(success_response(data), status=status.HTTP_200_OK)

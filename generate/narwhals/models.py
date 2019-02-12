@@ -7,6 +7,7 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from authentication.models import Swimmer, Runner
+from stats.models import SwimmingStats, RunningStats
 
 
 class SwimWorkout(models.Model):
@@ -29,14 +30,13 @@ class SwimWorkout(models.Model):
                                 blank=True, null=True)
     duration = models.IntegerField(verbose_name=(_('Duration of the training')),
                                 help_text=_('Duration of the training'),
-                                blank=True, null=True)
-
+                                default=0)
     distance = models.FloatField(verbose_name=(_('Distance of the training')),
                                 help_text=_('Distance of the training'),
-                                blank=True, null=True)
+                                default=0)
     strokes = models.FloatField(verbose_name=(_('Calculated strokes')),
                                 help_text=_('Calculated strokes'),
-                                blank=True, null=True)
+                                default=0)
     speedAverage = models.FloatField(verbose_name=(_('Average speed in meter/seconds')),
                                 help_text=_('Average speed in meter/seconds'),
                                 blank=True, null=True)
@@ -56,7 +56,7 @@ class SwimWorkout(models.Model):
 # Trigger to update user data after workout save
 # Adding distance, time and strokes to the User's total profile data
 @receiver(post_save, sender=SwimWorkout)
-def user_total_sum_create(sender, instance=None, created=False, **kwargs):
+def swimmer_post_save(sender, instance=None, created=False, **kwargs):
     user = instance.user
     if created:
         user.meters += instance.distance
@@ -64,12 +64,26 @@ def user_total_sum_create(sender, instance=None, created=False, **kwargs):
         user.strokes += instance.strokes
         user.save()
 
+        # update stats
+        stats = SwimmingStats.objects.get(id=1)
+        stats.distance += instance.distance
+        stats.duration += instance.duration
+        stats.strokes += instance.strokes
+        stats.save()
+
+
 # When updating instead creating
 @receiver(pre_save, sender=SwimWorkout)
-def user_total_sum_update(sender, instance=None, **kwargs):
+def swimmer_pre_save(sender, instance=None, **kwargs):
     user = instance.user
     # Get old values
-    old_workout = SwimWorkout.objects.get(id=instance.id)
+    old_workout = None
+    try:
+        old_workout = SwimWorkout.objects.get(id=instance.id)
+    except:
+        pass
+    if not old_workout:
+        return
     old_meters = old_workout.distance
     old_minutes = old_workout.duration
     old_strokes = old_workout.strokes
@@ -83,14 +97,32 @@ def user_total_sum_update(sender, instance=None, **kwargs):
     user.strokes += instance.strokes
     user.save()
 
+    # update stats
+    stats = SwimmingStats.objects.get(id=1)
+    stats.distance -= old_meters
+    stats.duration -= old_minutes
+    stats.strokes -= old_strokes
+    stats.distance += instance.distance
+    stats.duration += instance.duration
+    stats.strokes += instance.strokes
+    stats.save()
+
+
 # When deleting a workout
 @receiver(post_delete, sender=SwimWorkout)
-def user_total_sum(sender, instance=None, **kwargs):
+def swimmer_delete(sender, instance=None, **kwargs):
     user = instance.user
     user.meters -= instance.distance
     user.minutes -= instance.duration
     user.strokes -= instance.strokes
     user.save()
+
+    # update stats
+    stats = SwimmingStats.objects.get(id=1)
+    stats.distance -= instance.distance
+    stats.duration -= instance.duration
+    stats.strokes -= instance.strokes
+    stats.save()
 
 
 class RunWorkout(models.Model):
@@ -113,13 +145,13 @@ class RunWorkout(models.Model):
                                 blank=True, null=True)
     duration = models.IntegerField(verbose_name=(_('Duration of the training')),
                                 help_text=_('Duration of the training'),
-                                blank=True, null=True)
+                                default=0)
 
 
 
     distance = models.FloatField(verbose_name=(_('Distance of the training')),
                                 help_text=_('Distance of the training'),
-                                blank=True, null=True)
+                                default=0)
     ascendedMeters = models.IntegerField(verbose_name=(_('Acended meters')),
                                 help_text=_('Ascended meters'),
                                 blank=True, null=True)
@@ -154,16 +186,21 @@ class RunWorkout(models.Model):
 # Trigger to update user data after workout save
 # Adding distance, time and strokes to the User's total profile data
 @receiver(post_save, sender=RunWorkout)
-def user_total_sum_create(sender, instance=None, created=False, **kwargs):
+def runner_post_save(sender, instance=None, created=False, **kwargs):
     user = instance.user
     if created:
         user.meters += instance.distance
         user.minutes += instance.duration
         user.save()
+        # update stats
+        stats = RunningStats.objects.get(id=1)
+        stats.distance += instance.distance
+        stats.duration += instance.duration
+        stats.save()
 
 # When updating instead creating
 @receiver(pre_save, sender=RunWorkout)
-def user_total_sum_update(sender, instance=None, **kwargs):
+def runner_pre_save(sender, instance=None, **kwargs):
     user = instance.user
     # Get old values
     old_workout = None
@@ -174,7 +211,11 @@ def user_total_sum_update(sender, instance=None, **kwargs):
     if not old_workout:
        return
     old_meters = old_workout.distance
+    if not old_meters:
+        old_meters = 0
     old_minutes = old_workout.duration
+    if not old_minutes:
+        old_minutes = 0
     # Substract old values
     user.meters -= old_meters
     user.minutes -= old_minutes
@@ -183,10 +224,26 @@ def user_total_sum_update(sender, instance=None, **kwargs):
     user.minutes += instance.duration
     user.save()
 
+    # update stats
+    stats = RunningStats.objects.get(id=1)
+    stats.distance -= old_meters
+    stats.duration -= old_minutes
+    stats.distance += instance.distance
+    stats.duration += instance.duration
+    stats.save()
+
+
 # When deleting a workout
 @receiver(post_delete, sender=RunWorkout)
-def user_total_sum(sender, instance=None, **kwargs):
+def runner_delete(sender, instance=None, **kwargs):
     user = instance.user
     user.meters -= instance.distance
     user.minutes -= instance.duration
     user.save()
+
+    # update stats
+    stats = RunningStats.objects.get(id=1)
+    stats.distance -= instance.distance
+    stats.duration -= instance.duration
+    stats.save()
+

@@ -47,3 +47,17 @@ def sport_checker(f):
         return f(*args, **kwargs)
     return wrapper
 
+def landing_key_checker(f):
+    def wrapper(*args, **kwargs):
+        for param in args:
+            if isinstance(param, Request):
+                request = param
+
+        key_provided = request.GET.get('api_key', '')
+        logging.debug('api key %s' % key_provided)
+        if key_provided != getattr(settings, 'LANDING_KEY'):
+            return Response(error_response('Api key needed.'),
+                            status=status.HTTP_400_BAD_REQUEST)
+        return f(*args, **kwargs)
+    return wrapper
+
