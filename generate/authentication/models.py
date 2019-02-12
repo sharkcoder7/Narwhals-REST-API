@@ -14,14 +14,17 @@ from django.utils.translation import ugettext_lazy as _
 SWIMMING = 0
 RUNNING = 1 
 SPORTS = (
-        (SWIMMING, 'swimming'),
-        (RUNNING, 'running'),
+        (SWIMMING, 'S'),
+        (RUNNING, 'R'),
 )
 
 UP = 'up';
+EQUALS = 'equals'
 DOWN = 'down'
+
 TREND_CHOICES = (
 	(UP, 'UP'),
+        (EQUALS, 'EQUALS'),
         (DOWN, 'DOWN'),
 )
 
@@ -54,12 +57,12 @@ class User(EmailAbstractUser):
     name = models.CharField(max_length=50, blank=True, null=True)
     surname = models.CharField(max_length=100, blank=True, null=True)
     bio = models.CharField(max_length=500, blank=True, null=True)
-    avatar = models.CharField(max_length=100, blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars', blank=True, null=True)
 
     objects = EmailUserManager()
 
-    #USERNAME_FIELD = 'email'
-    #REQUIRED_FIELDS = ['date_of_birth']
+    def get_avatar_url(self):
+        return settings.SERVER_URL + self.avatar.url
 
 
 class Swimmer(models.Model):
@@ -84,7 +87,7 @@ class Swimmer(models.Model):
     minutesAverage = models.IntegerField(verbose_name=(_('Minutes average.')),
                                    help_text=_('Minutes average'),
                                    blank=True, default=0)
-    trend = models.CharField(max_length=10, choices=TREND_CHOICES, default=DOWN)
+    trend = models.CharField(max_length=10, choices=TREND_CHOICES, default=EQUALS)
 
 
 class Runner(models.Model):
@@ -100,4 +103,4 @@ class Runner(models.Model):
     minutes = models.IntegerField(verbose_name=(_('Total minutes.')),
                                    help_text=_('Total minutes.'),
                                    blank=True, default=0)
-    trend = models.CharField(max_length=10, choices=TREND_CHOICES, default=DOWN)
+    trend = models.CharField(max_length=10, choices=TREND_CHOICES, default=EQUALS)

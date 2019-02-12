@@ -6,32 +6,31 @@ from authentication.models import Swimmer, Runner
 
 
 class SwimmerAdmin(admin.ModelAdmin):
-    list_display = (#"email",
-                    #"date_of_birth",
-                    "position",
-                    "meters",
-                    "minutes",
-                    "strokes",
-                    #"city_id",
-                    #"name",
-                    #"surname",
-                    "trend")
+    list_display = ('email',
+                    'position',
+                    'meters',
+                    'minutes',
+                    'strokes',
+                    'trend')
 
-#admin.site.unregister(get_user_model())
-#admin.site.register(get_user_model(), SwimmerAdmin)
+    readonly_fields = ('email',)
+
+    def email(self, obj):
+        return obj.type.email
+
+
 admin.site.register(Swimmer, SwimmerAdmin)
 
 class RunnerAdmin(admin.ModelAdmin):
-    list_display = (#"email",
-                    #"date_of_birth",
-                    "position",
-                    "meters",
-                    "minutes",
-                    #"city_id",
-                    #"name",
-                    #"surname",
-                    "trend")
+    list_display = ('email',
+                    'position',
+                    'meters',
+                    'minutes',
+                    'trend')
+
+    readonly_fields = ('email',)
+
+    def email(self, obj):
+        return obj.type.email
 
 admin.site.register(Runner, RunnerAdmin)
-#admin.site.unregister(get_user_model())
-#admin.site.register(get_user_model(), RunnerAdmin)

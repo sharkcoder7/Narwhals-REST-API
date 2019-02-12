@@ -32,6 +32,8 @@ def sport_checker(f):
                 request = param
 
         sport = request.data.get('sport', '')
+        if sport == '':
+            sport = request.GET.get('sport', '')
         if sport != '':
             try:
                 str_sport = SPORTS[int(sport)]

@@ -87,6 +87,10 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = '/home/apelegrina/webapps/generate_static/'
 
+MEDIA_ROOT = '/home/apelegrina/webapps/generate_static/media'
+
+MEDIA_URL = '/media/'
+
 # Android App settings
 min_app_version = 1
 force_update = True
