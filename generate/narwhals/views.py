@@ -32,11 +32,13 @@ class WorkoutList(APIView):
     authentication_classes = (BasicAuthentication, TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+    @api_key_checker
     def get(self, request, format=None):
         workouts = Workout.objects.filter(user=request.user)
         serializer = WorkoutSerializer(workouts, many=True)
         return Response(success_response(serializer.data))
 
+    @api_key_checker
     def post(self, request, format=None):
         data = request.data
         data["user"] = request.user.id
@@ -58,6 +60,7 @@ class WorkoutDetail(APIView):
     authentication_classes = (BasicAuthentication, TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+    @api_key_checker
     def get(self, request, pk, format=None):
         try:
             workout = Workout.objects.get(id=pk, user=request.user)
@@ -67,6 +70,7 @@ class WorkoutDetail(APIView):
         serializer = WorkoutSerializer(workout)
         return Response(success_response(serializer.data), status=status.HTTP_200_OK)
 
+    @api_key_checker
     def put(self, request, pk, format=None):
         workout = self.get_object(pk, request.user)
         serializer = WorkoutSerializer(workout, data=request.data)
@@ -77,6 +81,7 @@ class WorkoutDetail(APIView):
         return Response(error_response(serializer.errors),
                         status=status.HTTP_400_BAD_REQUEST)
 
+    @api_key_checker
     def delete(self, request, pk, format=None):
         workout = self.get_object(pk, request.user)
         workout.delete()

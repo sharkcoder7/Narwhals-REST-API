@@ -40,6 +40,13 @@ class UserList(APIView):
     authentication_classes = (BasicAuthentication, TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+    @api_key_checker
+    def get(self, request, format=None):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(success_response(serializer.data))
+
+    @api_key_checker
     def post(self, request, format=None):
         serializer = UserSerializer(data=request.data)
 
@@ -49,6 +56,24 @@ class UserList(APIView):
                             status=status.HTTP_201_CREATED)
         return Response(error_response(serializer.errors),
                         status=status.HTTP_400_BAD_REQUEST)
+
+    @api_key_checker
+    def put(self, request, format=None):
+        user = request.user
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(success_response(serializer.data),
+                            status=status.HTTP_201_CREATED)
+        return Response(error_response(serializer.errors),
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    @api_key_checker
+    def delete(self, request, format=None):
+        user = self.get_object(pk, request.user)
+        user.delete()
+        return Response(success_response("null"),
+                        status=status.HTTP_204_NO_CONTENT)
 
 
 class ObtainAuthToken(APIView):

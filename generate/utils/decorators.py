@@ -21,6 +21,6 @@ def api_key_checker(f):
         if key_provided != getattr(settings, 'API_KEY'):
             return Response(error_response("Api key needed."),
                             status=status.HTTP_400_BAD_REQUEST)
-        return f(*args)
+        return f(*args, **kwargs)
     return wrapper
 
