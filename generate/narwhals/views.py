@@ -17,6 +17,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from models import Workout
 from authentication.models import User
 from serializers import WorkoutSerializer
+from paginator import CustomPagination
 from utils.helpers import success_response, error_response
 from utils.decorators import api_key_checker
 
@@ -34,9 +35,10 @@ class WorkoutList(APIView):
 
     @api_key_checker
     def get(self, request, format=None):
+        paginator = CustomPagination()
         workouts = Workout.objects.filter(user=request.user)
         serializer = WorkoutSerializer(workouts, many=True)
-        return Response(success_response(serializer.data))
+        return paginator.get_paginated_response(success_response(serializer.data))
 
     @api_key_checker
     def post(self, request, format=None):
